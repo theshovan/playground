@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AetherStudy — Premium Planner & Focus Dashboard</title>
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Active Recall Quiz Modal (Global Interrupt) -->
+  <div id="active-recall-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card active-recall-card animate-zoom">
+      <div class="active-recall-header">
+        <div class="recall-icon-container">
+          <i data-lucide="brain-circuit" class="icon-pulse"></i>
+        </div>
+        <div>
+          <h2>Active Recall Alert!</h2>
+          <p class="subtitle">Quick quiz to boost your memory retention.</p>
+        </div>
+      </div>
+      <div id="active-recall-body" class="active-recall-body">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="active-recall-footer">
+        <button id="recall-submit-btn" class="btn btn-primary">Submit Answer</button>
+        <button id="recall-skip-btn" class="btn btn-secondary">Skip Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar glass">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <span class="brand-name">AetherStudy</span>
+      </div>
+
+      <!-- XP & Level Card -->
+      <div class="xp-card glass-card">
+        <div class="xp-info">
+          <span class="xp-level">Lvl <span id="user-level">1</span></span>
+          <span class="xp-value"><span id="user-xp">0</span> / 100 XP</span>
+        </div>
+        <div class="xp-progress-bar">
+          <div id="user-xp-fill" class="xp-progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="streak-badge">
+          <i data-lucide="flame" class="streak-icon"></i>
+          <span><span id="user-streak">0</span> Day Streak</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#planner" class="nav-link active" data-tab="planner">
+          <i data-lucide="calendar"></i>
+          <span>Study Planner</span>
+        </a>
+        <a href="#pomodoro" class="nav-link" data-tab="pomodoro">
+          <i data-lucide="timer"></i>
+          <span>Focus Timer</span>
+        </a>
+        <a href="#flashcards" class="nav-link" data-tab="flashcards">
+          <i data-lucide="copy"></i>
+          <span>Flashcards</span>
+        </a>
+        <a href="#quiz" class="nav-link" data-tab="quiz">
+          <i data-lucide="brain"></i>
+          <span>Quiz Hub</span>
+        </a>
+        <a href="#settings" class="nav-link" data-tab="settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>&copy; 2026 AetherStudy</p>
+        <p class="tagline">Stay focused, study smart</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="main-header glass">
+        <div class="header-welcome">
+          <h1 id="greeting">Hello, Scholar!</h1>
+          <p id="live-date" class="header-date">Saturday, June 27, 2026</p>
+        </div>
+        <div class="header-actions">
+          <!-- Active Recall Status indicator -->
+          <div class="recall-status-pill indicator-active" id="recall-status-indicator">
+            <span class="status-dot animate-ping-slow"></span>
+            <span class="status-text">Recall Active</span>
+          </div>
+
+          <!-- Notification Hub Trigger -->
+          <button class="header-btn" id="notif-hub-btn" title="System Notifications">
+            <i data-lucide="bell"></i>
+            <span class="badge hidden" id="notif-badge"></span>
+          </button>
+
+          <!-- Dark/Light Theme Toggle -->
+          <button class="header-btn" id="theme-toggle-btn" title="Toggle Theme">
+            <i data-lucide="moon" id="theme-icon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views (Tabs) -->
+      <div class="content-view-container">
+
+        <!-- 1. STUDY PLANNER VIEW -->
+        <section id="view-planner" class="tab-view active-view">
+          <div class="view-header">
+            <h2>Study Planner</h2>
+            <p>Schedule your daily sessions and organize your tasks.</p>
+          </div>
+
+          <div class="planner-grid">
+            <!-- Left Panel: Daily Schedule Grid -->
+            <div class="schedule-column glass-card">
+              <div class="panel-header">
+                <h3>Daily Schedule</h3>
+                <div class="schedule-actions">
+                  <span class="badge-accent">Today</span>
+                </div>
+              </div>
+              <div class="schedule-hours-container" id="schedule-hours">
+                <!-- Programmatically generated hours from 8 AM to 8 PM -->
+              </div>
+            </div>
+
+            <!-- Right Panel: Tasks Manager -->
+            <div class="tasks-column glass-card">
+              <div class="panel-header">
+                <h3>Task Manager</h3>
+                <button class="btn btn-primary btn-sm" id="new-task-btn">
+                  <i data-lucide="plus"></i> Add Task
+                </button>
+              </div>
+
+              <!-- Task Filters -->
+              <div class="task-filters">
+                <button class="filter-chip active" data-filter="all">All</button>
+                <button class="filter-chip" data-filter="todo">Todo</button>
+                <button class="filter-chip" data-filter="in_progress">In Progress</button>
+                <button class="filter-chip" data-filter="done">Completed</button>
+              </div>
+
+              <!-- Tasks List -->
+              <div class="tasks-list" id="tasks-list">
+                <!-- Task list items will go here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. FOCUS TIMER (POMODORO) VIEW -->
+        <section id="view-pomodoro" class="tab-view">
+          <div class="view-header">
+            <h2>Pomodoro Focus Timer</h2>
+            <p>Engage deep focus and tie sessions directly to tasks.</p>
+          </div>
+
+          <div class="pomodoro-grid">
+            <!-- Timer Card -->
+            <div class="timer-card glass-card">
+              <!-- Mode Tabs -->
+              <div class="timer-modes">
+                <button class="timer-mode-btn active" data-mode="work">Work Session</button>
+                <button class="timer-mode-btn" data-mode="short">Short Break</button>
+                <button class="timer-mode-btn" data-mode="long">Long Break</button>
+              </div>
+
+              <!-- Visual Radial Timer -->
+              <div class="timer-visual-container">
+                <svg class="timer-svg" viewBox="0 0 200 200">
+                  <circle class="timer-bg-circle" cx="100" cy="100" r="85" />
+                  <circle class="timer-progress-circle" cx="100" cy="100" r="85" id="timer-progress" />
+                </svg>
+                <div class="timer-time" id="timer-display">25:00</div>
+              </div>
+
+              <!-- Focus Task Attachment -->
+              <div class="focus-task-indicator" id="focus-task-container">
+                <span class="label">Active Focus Target:</span>
+                <div class="focus-task-content" id="focus-task-content">
+                  <span class="no-task-placeholder">No active task selected. Pick one from the list!</span>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div class="timer-controls">
+                <button class="btn-circle btn-secondary" id="timer-reset" title="Reset Session">
+                  <i data-lucide="rotate-ccw"></i>
+                </button>
+                <button class="btn-circle btn-primary btn-lg" id="timer-play" title="Start Session">
+                  <i data-lucide="play"></i>
+                </button>
+                <button class="btn-circle btn-secondary" id="timer-skip" title="Skip Session">
+                  <i data-lucide="skip-forward"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats & Picker Card -->
+            <div class="timer-stats-card glass-card">
+              <h3>Session Stats</h3>
+              <div class="stats-mini-grid">
+                <div class="stat-box">
+                  <span class="stat-num" id="stat-sessions-today">0</span>
+                  <span class="stat-label">Focus Sessions</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-num" id="stat-minutes-today">0</span>
+                  <span class="stat-label">Minutes Focused</span>
+                </div>
+              </div>
+
+              <div class="task-selector-wrapper">
+                <h4>Link a Task to Focus On:</h4>
+                <select id="pomodoro-task-picker" class="form-control select-dropdown">
+                  <option value="">-- Select task from planner --</option>
+                  <!-- Dynamically populated from active tasks -->
+                </select>
+              </div>
+
+              <div class="focus-tips glass-card mt-3">
+                <div class="tips-header">
+                  <i data-lucide="lightbulb" class="accent-color"></i>
+                  <h5>Focus Tip</h5>
+                </div>
+                <p class="text-sm">Turn off notifications, plug in headphones, and focus on one specific micro-task for 25 minutes.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. FLASHCARDS VIEW -->
+        <section id="view-flashcards" class="tab-view">
+          <div class="view-header">
+            <h2>Flashcard Decks</h2>
+            <p>Retain information using active recall and spaced review decks.</p>
+          </div>
+
+          <!-- Deck List View -->
+          <div id="deck-list-container" class="deck-list-container">
+            <div class="list-actions">
+              <h3>My Decks</h3>
+              <button class="btn btn-primary" id="create-deck-btn">
+                <i data-lucide="plus-circle"></i> Create Deck
+              </button>
+            </div>
+            <div class="decks-grid" id="decks-grid">
+              <!-- Dynamically rendered decks -->
+            </div>
+          </div>
+
+          <!-- Single Deck Study View (Hidden by default) -->
+          <div id="deck-study-container" class="deck-study-container hidden">
+            <div class="deck-study-header">
+              <button class="btn btn-secondary btn-sm" id="study-back-btn">
+                <i data-lucide="arrow-left"></i> Back to Decks
+              </button>
+              <h3 id="study-deck-title">Deck Title</h3>
+              <button class="btn btn-secondary btn-sm" id="add-card-to-deck-btn">
+                <i data-lucide="plus"></i> Add Card
+              </button>
+            </div>
+
+            <div class="study-progress-wrapper">
+              <div class="study-progress-text">
+                Card <span id="study-current-idx">1</span> of <span id="study-total-cards">10</span>
+              </div>
+              <div class="study-progress-bar">
+                <div id="study-progress-fill" class="study-progress-fill" style="width: 10%"></div>
+              </div>
+            </div>
+
+            <!-- 3D Flippable Flashcard -->
+            <div class="flashcard-wrapper">
+              <div class="flashcard-container" id="study-card-container">
+                <div class="flashcard-inner" id="study-card-inner">
+                  <!-- Front Side -->
+                  <div class="flashcard-side flashcard-front">
+                    <div class="card-side-label">QUESTION</div>
+                    <div class="card-text" id="card-front-text">Front side of the card. Click to flip!</div>
+                    <div class="card-prompt"><i data-lucide="rotate-3d"></i> Click or tap card to flip</div>
+                  </div>
+                  <!-- Back Side -->
+                  <div class="flashcard-side flashcard-back">
+                    <div class="card-side-label">ANSWER</div>
+                    <div class="card-text" id="card-back-text">Back side of the card. Correct details go here.</div>
+                    <div class="card-prompt"><i data-lucide="rotate-3d"></i> Click to see question</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grade / Performance buttons -->
+            <div class="study-controls">
+              <p class="study-prompt-msg">Rate your recall of this card:</p>
+              <div class="btn-group">
+                <button class="btn btn-danger" id="grade-hard-btn">
+                  <i data-lucide="x-circle"></i> Hard (Study Again)
+                </button>
+                <button class="btn btn-success" id="grade-easy-btn">
+                  <i data-lucide="check-circle"></i> Easy (Mastered)
+                </button>
+              </div>
+              <div class="navigation-controls mt-3">
+                <button class="btn-circle btn-secondary" id="study-prev-btn" title="Previous Card">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button class="btn-circle btn-secondary" id="study-next-btn" title="Next Card">
+                  <i data-lucide="chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. QUIZ HUB VIEW -->
+        <section id="view-quiz" class="tab-view">
+          <div class="view-header">
+            <h2>Quiz Hub & Reminders</h2>
+            <p>Make customizable quizzes and configure pop-up recall tests.</p>
+          </div>
+
+          <div class="quiz-layout-grid">
+            <!-- Left Panel: Create and Manage Quizzes -->
+            <div class="quiz-manager-panel glass-card">
+              <div class="panel-header">
+                <h3>My Quiz Banks</h3>
+                <button class="btn btn-primary btn-sm" id="create-quiz-btn">
+                  <i data-lucide="plus-circle"></i> Create Quiz
+                </button>
+              </div>
+
+              <div class="quiz-list" id="quiz-list-container">
+                <!-- Dynamically populated quiz list -->
+              </div>
+            </div>
+
+            <!-- Right Panel: Active Recall Reminder Setup -->
+            <div class="recall-setup-panel glass-card">
+              <h3>Active Recall Settings</h3>
+              <p class="text-muted">AetherStudy will periodically pop up a random question from your flashcards or quizzes during your study session to strengthen memory pathways.</p>
+
+              <div class="settings-form">
+                <!-- Enable/Disable toggle -->
+                <div class="setting-toggle-row">
+                  <div class="toggle-details">
+                    <label class="toggle-title">Enable Active Recall Popups</label>
+                    <span class="toggle-desc">Trigger periodic questions while app is running</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="recall-enable-toggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <!-- Frequency Slider -->
+                <div class="setting-slider-group mt-3">
+                  <div class="slider-details">
+                    <label for="recall-interval-slider">Popup Interval Time</label>
+                    <span class="slider-val" id="recall-interval-val">15 minutes</span>
+                  </div>
+                  <input type="range" id="recall-interval-slider" min="1" max="60" value="15" class="slider-input">
+                </div>
+
+                <!-- Source configuration -->
+                <div class="setting-form-group mt-3">
+                  <label for="recall-source-select">Active Recall Pool Source</label>
+                  <select id="recall-source-select" class="form-control select-dropdown">
+                    <option value="all">All Flashcards & Quizzes</option>
+                    <option value="flashcards">Flashcards Only</option>
+                    <option value="quizzes">Quizzes Only</option>
+                  </select>
+                </div>
+
+                <div class="xp-banner glass-card mt-4">
+                  <div class="xp-banner-header">
+                    <i data-lucide="award" class="xp-gold"></i>
+                    <h5>Get XP for Answers!</h5>
+                  </div>
+                  <p class="text-sm">Answering active recall popups correctly rewards you with <strong>+15 XP</strong> to boost your Study Level.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. SETTINGS VIEW -->
+        <section id="view-settings" class="tab-view">
+          <div class="view-header">
+            <h2>Settings</h2>
+            <p>Customize timers, notifications, and manage app preferences.</p>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Timer Durations Configuration -->
+            <div class="settings-card glass-card">
+              <h3>Pomodoro Timers</h3>
+              <p class="text-muted">Customize session durations (in minutes).</p>
+              
+              <div class="settings-inputs-grid">
+                <div class="form-group">
+                  <label for="setting-work-duration">Work Interval</label>
+                  <input type="number" id="setting-work-duration" min="1" max="120" value="25" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="setting-short-duration">Short Break</label>
+                  <input type="number" id="setting-short-duration" min="1" max="60" value="5" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="setting-long-duration">Long Break</label>
+                  <input type="number" id="setting-long-duration" min="1" max="60" value="15" class="form-control">
+                </div>
+              </div>
+              
+              <button class="btn btn-primary mt-3" id="save-timers-btn">Save Timer Settings</button>
+            </div>
+
+            <!-- Notifications Preferences -->
+            <div class="settings-card glass-card">
+              <h3>System Notifications</h3>
+              <p class="text-muted">Configure desktop notifications and synthesized alerts.</p>
+
+              <div class="setting-toggle-row mt-3">
+                <div class="toggle-details">
+                  <label class="toggle-title">System Sound Effects</label>
+                  <span class="toggle-desc">Synthesize focus alerts and completion sound effects</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="setting-sound-toggle" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="setting-toggle-row mt-3">
+                <div class="toggle-details">
+                  <label class="toggle-title">Desktop Notifications</label>
+                  <span class="toggle-desc">Trigger browser system alerts when timers complete</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-request-notif-permission">Request Permission</button>
+              </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="settings-card glass-card span-cols-2">
+              <h3>Danger Zone</h3>
+              <p class="text-muted">Operations that delete your local storage state.</p>
+              <div class="danger-row mt-3">
+                <div class="danger-info">
+                  <h5>Reset Workspace Data</h5>
+                  <p class="text-sm text-muted">This permanently purges all saved schedules, task entries, flashcards, and quizzes. This action is irreversible.</p>
+                </div>
+                <button class="btn btn-danger" id="reset-data-btn">Reset App Data</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- DIALOG / MODAL TEMPLATES (Hidden overlays) -->
+  
+  <!-- Task Creator Modal -->
+  <div id="task-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card animate-zoom">
+      <div class="modal-header">
+        <h3 id="task-modal-title">Create New Task</h3>
+        <button class="modal-close-btn" id="task-modal-close"><i data-lucide="x"></i></button>
+      </div>
+      <form id="task-form" class="modal-body">
+        <input type="hidden" id="task-id">
+        
+        <div class="form-group">
+          <label for="task-title-input">Task Title *</label>
+          <input type="text" id="task-title-input" required class="form-control" placeholder="e.g. Study Biology Cell Division">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-category-input">Category</label>
+            <select id="task-category-input" class="form-control select-dropdown">
+              <option value="Study">Study</option>
+              <option value="Coding">Coding</option>
+              <option value="Reading">Reading</option>
+              <option value="Language">Language</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="task-priority-input">Priority</label>
+            <select id="task-priority-input" class="form-control select-dropdown">
+              <option value="Low">Low Priority</option>
+              <option value="Medium" selected>Medium Priority</option>
+              <option value="High">High Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-duedate-input">Due Date</label>
+            <input type="date" id="task-duedate-input" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="task-timeblock-input">Schedule Block (Daily)</label>
+            <select id="task-timeblock-input" class="form-control select-dropdown">
+              <option value="">-- Don't schedule yet --</option>
+              <!-- Populated dynamic hours e.g. 08:00 AM -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="task-desc-input">Description / Notes</label>
+          <textarea id="task-desc-input" rows="3" class="form-control" placeholder="Add details or references..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="task-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Deck Creator Modal -->
+  <div id="deck-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card animate-zoom">
+      <div class="modal-header">
+        <h3>Create New Deck</h3>
+        <button class="modal-close-btn" id="deck-modal-close"><i data-lucide="x"></i></button>
+      </div>
+      <form id="deck-form" class="modal-body">
+        <div class="form-group">
+          <label for="deck-title-input">Deck Name *</label>
+          <input type="text" id="deck-title-input" required class="form-control" placeholder="e.g. World History">
+        </div>
+        <div class="form-group">
+          <label for="deck-desc-input">Description</label>
+          <input type="text" id="deck-desc-input" class="form-control" placeholder="Brief summary of what's inside">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="deck-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Deck</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Flashcard Creator Modal (Inside Deck View) -->
+  <div id="card-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card animate-zoom">
+      <div class="modal-header">
+        <h3>Add Flashcard</h3>
+        <button class="modal-close-btn" id="card-modal-close"><i data-lucide="x"></i></button>
+      </div>
+      <form id="card-form" class="modal-body">
+        <input type="hidden" id="card-deck-id">
+        <div class="form-group">
+          <label for="card-front-input">Front Side (Question/Term) *</label>
+          <textarea id="card-front-input" required class="form-control" rows="3" placeholder="Write question..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="card-back-input">Back Side (Answer/Definition) *</label>
+          <textarea id="card-back-input" required class="form-control" rows="3" placeholder="Write answer..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="card-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Flashcard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quiz Creator Modal -->
+  <div id="quiz-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card animate-zoom">
+      <div class="modal-header">
+        <h3>Create New Quiz Bank</h3>
+        <button class="modal-close-btn" id="quiz-modal-close"><i data-lucide="x"></i></button>
+      </div>
+      <form id="quiz-form" class="modal-body">
+        <div class="form-group">
+          <label for="quiz-title-input">Quiz Title *</label>
+          <input type="text" id="quiz-title-input" required class="form-control" placeholder="e.g. Physics Formula Quiz">
+        </div>
+        <div class="form-group">
+          <label for="quiz-desc-input">Description</label>
+          <input type="text" id="quiz-desc-input" class="form-control" placeholder="Brief summary of topic">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="quiz-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Quiz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quiz Question Adder Modal -->
+  <div id="quiz-q-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card animate-zoom">
+      <div class="modal-header">
+        <h3>Add Quiz Question</h3>
+        <button class="modal-close-btn" id="quiz-q-modal-close"><i data-lucide="x"></i></button>
+      </div>
+      <form id="quiz-q-form" class="modal-body">
+        <input type="hidden" id="quiz-q-parent-id">
+        
+        <div class="form-group">
+          <label for="quiz-q-text">Question Text *</label>
+          <input type="text" id="quiz-q-text" required class="form-control" placeholder="Enter question...">
+        </div>
+
+        <div class="form-group">
+          <label for="quiz-q-type">Answer Type</label>
+          <select id="quiz-q-type" class="form-control select-dropdown">
+            <option value="mcq">Multiple Choice (MCQ)</option>
+            <option value="text">Short Text Answer</option>
+          </select>
+        </div>
+
+        <!-- MCQ Options Section -->
+        <div id="mcq-options-container">
+          <label>MCQ Options (Check the correct one) *</label>
+          <div class="mcq-option-row">
+            <input type="radio" name="correct-option" value="0" checked>
+            <input type="text" class="form-control mcq-opt-input" required placeholder="Option A">
+          </div>
+          <div class="mcq-option-row">
+            <input type="radio" name="correct-option" value="1">
+            <input type="text" class="form-control mcq-opt-input" required placeholder="Option B">
+          </div>
+          <div class="mcq-option-row">
+            <input type="radio" name="correct-option" value="2">
+            <input type="text" class="form-control mcq-opt-input" placeholder="Option C (Optional)">
+          </div>
+          <div class="mcq-option-row">
+            <input type="radio" name="correct-option" value="3">
+            <input type="text" class="form-control mcq-opt-input" placeholder="Option D (Optional)">
+          </div>
+        </div>
+
+        <!-- Short Answer Section (Hidden by default) -->
+        <div id="short-answer-container" class="hidden">
+          <div class="form-group">
+            <label for="quiz-q-answer">Correct Answer Text *</label>
+            <input type="text" id="quiz-q-answer" class="form-control" placeholder="Exact correct answer term">
+            <small class="text-muted">Answers are validated case-insensitively.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="quiz-q-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Question</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Run Quiz Modal -->
+  <div id="run-quiz-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card animate-zoom">
+      <div class="modal-header">
+        <h3 id="run-quiz-title">Quiz: Test</h3>
+        <button class="modal-close-btn" id="run-quiz-close"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" id="run-quiz-body">
+        <!-- Inside populated via JavaScript: Quiz Runner view -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Hub Panel / Drawer -->
+  <div id="notif-hub-drawer" class="drawer hidden">
+    <div class="drawer-header">
+      <h3>Notification Log</h3>
+      <button class="drawer-close-btn" id="notif-hub-close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="drawer-body" id="notif-hub-list">
+      <!-- List of in-app notification alerts -->
+      <span class="no-notifs">No notifications yet today.</span>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary btn-sm w-100" id="clear-notif-log-btn">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Modules Scripts -->
+  <script src="modules/notifications.js"></script>
+  <script src="modules/planner.js"></script>
+  <script src="modules/pomodoro.js"></script>
+  <script src="modules/flashcards.js"></script>
+  <script src="modules/quiz.js"></script>
+  <!-- Core script -->
+  <script src="app.js"></script>
+</body>
+</html>
