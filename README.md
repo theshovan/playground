@@ -1,4 +1,4 @@
-# AetherStudy — Glassmorphic Study Planner & Focus Dashboard
+# AetherStudy — Study Planner & Focus Dashboard
 
 AetherStudy is a premium, game-like single-page dashboard application built with a modern glassmorphism aesthetic for students to organize tasks, maintain focus, and practice active recall.
 
